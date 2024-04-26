@@ -39,6 +39,7 @@ func (b Bouncer) Check(csv string) (string, bool) {
 	for {
 		end := min(b.guests.MaxLen()+1, len(s))
 		commaPos = strings.IndexByte(s[:end], ',')
+		_ = s[commaPos+1:]
 		if commaPos == -1 {
 			name = s
 		} else {
