@@ -1,6 +1,7 @@
 package party
 
 import (
+	"maps"
 	"strings"
 
 	"github.com/jub0bs/go-perf-workshop/party/internal"
@@ -32,22 +33,19 @@ func (b Bouncer) Check(csv string) (string, bool) {
 	var (
 		name       string
 		commaFound bool
-		count      int
 	)
 	s := csv
+	guests := maps.Clone(b.guests)
 	for {
-		count++
 		name, s, commaFound = strings.Cut(s, ",")
 		normalized := strings.ToLower(name)
-		if !b.guests.Contains(normalized) {
+		if !guests.Contains(normalized) {
 			return "", false
 		}
+		delete(guests, normalized)
 		if !commaFound {
 			break
 		}
-	}
-	if count > len(b.guests) {
-		return "", false
 	}
 	return csv, true
 }
