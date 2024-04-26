@@ -26,27 +26,28 @@ func NewBouncer(guests ...string) Bouncer {
 // if so, it returns that list and true;
 // otherwise, it returns the empty string and false.
 func (b Bouncer) Check(csv string) (string, bool) {
-	var accepted []string
 	if csv == "" {
 		return "", true
 	}
 	var (
 		name       string
 		commaFound bool
+		count      int
 	)
+	s := csv
 	for {
-		name, csv, commaFound = strings.Cut(csv, ",")
+		count++
+		name, s, commaFound = strings.Cut(s, ",")
 		normalized := strings.ToLower(name)
 		if !b.guests.Contains(normalized) {
 			return "", false
 		}
-		accepted = append(accepted, normalized)
 		if !commaFound {
 			break
 		}
 	}
-	if len(accepted) > len(b.guests) {
+	if count > len(b.guests) {
 		return "", false
 	}
-	return strings.Join(accepted, ","), true
+	return csv, true
 }
