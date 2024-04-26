@@ -1,7 +1,7 @@
 package party
 
 import (
-	"maps"
+	"slices"
 	"strings"
 
 	"github.com/jub0bs/go-perf-workshop/party/internal"
@@ -9,16 +9,17 @@ import (
 
 // A Bouncer accepts guests to a party and reject everyone else.
 type Bouncer struct {
-	guests internal.Set
+	guests internal.SortedSet
 }
 
 // NewBouncer returns a new Bouncer whose list of case-insensitive guest
 // names is guests.
 func NewBouncer(guests ...string) Bouncer {
-	set := internal.NewSet()
-	for _, guest := range guests {
-		set.Add(strings.ToLower(guest))
+	guests = slices.Clone(guests)
+	for i := range guests {
+		guests[i] = strings.ToLower(guests[i])
 	}
+	set := internal.NewSet(guests...)
 	return Bouncer{guests: set}
 }
 
@@ -35,14 +36,15 @@ func (b Bouncer) Check(csv string) (string, bool) {
 		commaFound bool
 	)
 	s := csv
-	guests := maps.Clone(b.guests)
+	seen := make([]bool, len(b.guests))
 	for {
 		name, s, commaFound = strings.Cut(s, ",")
 		normalized := strings.ToLower(name)
-		if !guests.Contains(normalized) {
+		pos := b.guests.Position(normalized)
+		if pos == -1 || seen[pos] {
 			return "", false
 		}
-		delete(guests, normalized)
+		seen[pos] = true
 		if !commaFound {
 			break
 		}

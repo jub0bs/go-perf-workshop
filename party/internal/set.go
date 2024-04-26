@@ -1,16 +1,26 @@
 package internal
 
-type Set map[string]struct{}
+import (
+	"slices"
+)
 
-func NewSet(elems ...string) Set {
-	return make(map[string]struct{}, len(elems))
+type SortedSet map[string]int
+
+func NewSet(elems ...string) SortedSet {
+	sorted := slices.Clone(elems)
+	slices.Sort(sorted)
+	sorted = slices.Compact(sorted)
+	set := make(SortedSet, len(sorted))
+	for i, elem := range sorted {
+		set[elem] = i
+	}
+	return set
 }
 
-func (s Set) Add(elem string) {
-	s[elem] = struct{}{}
-}
-
-func (s Set) Contains(elem string) bool {
-	_, found := s[elem]
-	return found
+func (s SortedSet) Position(elem string) int {
+	pos, found := s[elem]
+	if !found {
+		return -1
+	}
+	return pos
 }
