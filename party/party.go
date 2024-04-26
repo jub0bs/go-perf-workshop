@@ -24,7 +24,7 @@ func NewBouncer(guests ...string) Bouncer {
 	set := internal.NewSet(guests...)
 	pool := sync.Pool{
 		New: func() any {
-			bools := make([]bool, len(set))
+			bools := make([]bool, set.Size())
 			return &bools
 		},
 	}
@@ -40,8 +40,8 @@ func (b Bouncer) Check(csv string) (string, bool) {
 		return "", true
 	}
 	var (
-		name       string
-		commaFound bool
+		name     string
+		commaPos int
 	)
 	s := csv
 	seen := b.pool.Get().(*[]bool)
@@ -50,16 +50,22 @@ func (b Bouncer) Check(csv string) (string, bool) {
 		b.pool.Put(seen)
 	}()
 	for {
-		name, s, commaFound = strings.Cut(s, ",")
-		//normalized := strings.ToLower(name)
+		end := min(b.guests.MaxLen()+1, len(s))
+		commaPos = strings.IndexByte(s[:end], ',')
+		if commaPos == -1 {
+			name = s
+		} else {
+			name = s[:commaPos]
+		}
 		pos := b.guests.Position(name)
 		if pos == -1 || (*seen)[pos] {
 			return "", false
 		}
 		(*seen)[pos] = true
-		if !commaFound {
+		if commaPos == -1 {
 			break
 		}
+		s = s[commaPos+1:]
 	}
 	return csv, true
 }
