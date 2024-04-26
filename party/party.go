@@ -30,13 +30,20 @@ func (b Bouncer) Check(csv string) (string, bool) {
 	if csv == "" {
 		return "", true
 	}
-	names := strings.Split(csv, ",")
-	for _, name := range names {
+	var (
+		name       string
+		commaFound bool
+	)
+	for {
+		name, csv, commaFound = strings.Cut(csv, ",")
 		normalized := strings.ToLower(name)
 		if !b.guests.Contains(normalized) {
 			return "", false
 		}
 		accepted = append(accepted, normalized)
+		if !commaFound {
+			break
+		}
 	}
 	if len(accepted) > len(b.guests) {
 		return "", false
