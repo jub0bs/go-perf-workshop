@@ -3,7 +3,6 @@ package party
 import (
 	"slices"
 	"strings"
-	"sync"
 
 	"github.com/jub0bs/go-perf-workshop/party/internal"
 )
@@ -11,7 +10,6 @@ import (
 // A Bouncer accepts guests to a party and reject everyone else.
 type Bouncer struct {
 	guests internal.SortedSet
-	pool   *sync.Pool
 }
 
 // NewBouncer returns a new Bouncer whose list of case-insensitive guest
@@ -21,14 +19,7 @@ func NewBouncer(guests ...string) Bouncer {
 	for i := range guests {
 		guests[i] = strings.ToLower(guests[i])
 	}
-	set := internal.NewSet(guests...)
-	pool := sync.Pool{
-		New: func() any {
-			bools := make([]bool, set.Size())
-			return &bools
-		},
-	}
-	return Bouncer{guests: set, pool: &pool}
+	return Bouncer{guests: internal.NewSet(guests...)}
 }
 
 // Check verifies whether csv is a list of unique, lowercase, comma-separated
@@ -40,15 +31,11 @@ func (b Bouncer) Check(csv string) (string, bool) {
 		return "", true
 	}
 	var (
-		name     string
-		commaPos int
+		name          string
+		commaPos      int
+		posOfLastSeen = -1
 	)
 	s := csv
-	seen := b.pool.Get().(*[]bool)
-	defer func() {
-		clear(*seen)
-		b.pool.Put(seen)
-	}()
 	for {
 		end := min(b.guests.MaxLen()+1, len(s))
 		commaPos = strings.IndexByte(s[:end], ',')
@@ -58,10 +45,10 @@ func (b Bouncer) Check(csv string) (string, bool) {
 			name = s[:commaPos]
 		}
 		pos := b.guests.Position(name)
-		if pos == -1 || (*seen)[pos] {
+		if pos == -1 || pos <= posOfLastSeen {
 			return "", false
 		}
-		(*seen)[pos] = true
+		posOfLastSeen = pos
 		if commaPos == -1 {
 			break
 		}

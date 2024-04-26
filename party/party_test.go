@@ -40,9 +40,15 @@ func TestBouncerCheck(t *testing.T) {
 			want:   "bar,foo",
 			ok:     true,
 		}, {
+			desc:   "all guests in wrong order",
+			guests: []string{"Foo", "Bar"},
+			csv:    "foo,bar",
+			want:   "",
+			ok:     false,
+		}, {
 			desc:   "one non-invited name",
 			guests: []string{"Foo", "Bar"},
-			csv:    "bar,foo,baz",
+			csv:    "bar,baz,foo",
 			want:   "",
 			ok:     false,
 		}, {
