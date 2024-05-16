@@ -85,6 +85,10 @@ func BenchmarkBouncerCheck(b *testing.B) {
 			guests: []string{"Foo", "Bar"},
 			csv:    "foo,bar",
 		}, {
+			desc:   "many guests",
+			guests: []string{"Foo", "Bar", "Foo1", "Bar1", "Foo2", "Bar2", "Foo3", "Bar3", "Foo4", "Bar4"},
+			csv:    "foo,bar,foo1,bar1,foo2,bar2,foo3,bar3,foo4,bar4",
+		}, {
 			desc:   "all guests but duplicated many times",
 			guests: []string{"Foo", "Bar"},
 			csv:    strings.Repeat("foo,bar,", 1024),
