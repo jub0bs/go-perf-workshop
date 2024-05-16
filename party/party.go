@@ -6,7 +6,7 @@ import (
 
 // A Bouncer accepts guests to a party and reject everyone else.
 type Bouncer struct {
-	guests []string
+	guests map[string]struct{}
 }
 
 // NewBouncer returns a new Bouncer whose list of case-insensitive guest
@@ -16,11 +16,7 @@ func NewBouncer(guests ...string) Bouncer {
 	for _, guest := range guests {
 		set[strings.ToLower(guest)] = struct{}{}
 	}
-	normalized := make([]string, 0, len(set))
-	for guest := range set {
-		normalized = append(normalized, guest)
-	}
-	return Bouncer{guests: normalized}
+	return Bouncer{guests: set}
 }
 
 // Check verifies whether csv is a list of unique, lowercase, comma-separated
@@ -31,25 +27,18 @@ func (b Bouncer) Check(csv string) (string, bool) {
 	if csv == "" {
 		return "", true
 	}
-	set := make(map[string]struct{})
 	names := strings.Split(csv, ",")
+	seen := make(map[string]struct{})
 	for _, name := range names {
-		var ok bool
-		for _, guest := range b.guests {
-			normalized := strings.ToLower(guest)
-			if name == normalized {
-				_, found := set[normalized]
-				if found {
-					return "", false
-				}
-				set[normalized] = struct{}{}
-				ok = true
-				break
-			}
-		}
-		if !ok {
+		_, found := b.guests[name]
+		if !found {
 			return "", false
 		}
+		_, found = seen[name]
+		if found {
+			return "", false
+		}
+		seen[name] = struct{}{}
 	}
 	return csv, true
 }

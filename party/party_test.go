@@ -87,7 +87,7 @@ func BenchmarkBouncerCheck(b *testing.B) {
 		}, {
 			desc:   "all guests but duplicated many times",
 			guests: []string{"Foo", "Bar"},
-			csv:    strings.Repeat("foo,bar", 1024),
+			csv:    strings.Repeat("foo,bar,", 1024),
 		}, {
 			desc: "maliciously long non-invited name",
 			// see https://en.wikipedia.org/wiki/Hubert_Blaine_Wolfeschlegelsteinhausenbergerdorff_Sr.
