@@ -1,0 +1,1 @@
+Benchstat: go install golang.org/x/perf/cmd/benchstat@latest
