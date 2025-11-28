@@ -1,7 +1,6 @@
 package party
 
 import (
-	"slices"
 	"strings"
 )
 
@@ -25,22 +24,19 @@ func NewBouncer(guests ...string) Bouncer {
 // if so, it returns that list and true;
 // otherwise, it returns the empty string and false.
 func (b Bouncer) Check(csv string) (string, bool) {
-	var accepted []string
 	if csv == "" {
 		return "", true
 	}
 	names := strings.Split(csv, ",")
-	for _, name := range names {
+	last := names[0]
+	for _, name := range names[1:] {
 		if _, ok := b.guests[name]; !ok {
 			return "", false
 		}
-		accepted = append(accepted, name)
+		if name <= last {
+			return "", false
+		}
+		last = name
 	}
-	deduped := slices.Clone(accepted)
-	slices.Sort(deduped)
-	deduped = slices.Compact(deduped)
-	if len(deduped) < len(accepted) {
-		return "", false
-	}
-	return strings.Join(accepted, ","), true
+	return csv, true
 }
