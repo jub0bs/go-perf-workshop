@@ -57,7 +57,21 @@ var cases = []TestCase{
 		csv:    "bar,foo,foo",
 		want:   "",
 		ok:     false,
+	}, {
+		desc:   "many guests",
+		guests: generateGuests(),
+		csv:    "x,y,z",
+		want:   "x,y,z",
+		ok:     true,
 	},
+}
+
+func generateGuests() []string {
+	var out []string
+	for c := 'a'; c <= 'z'; c++ {
+		out = append(out, string(c))
+	}
+	return out
 }
 
 func TestBouncerCheck(t *testing.T) {
