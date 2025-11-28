@@ -6,59 +6,61 @@ import (
 	"github.com/jub0bs/go-perf-workshop/party"
 )
 
+type TestCase struct {
+	desc   string
+	guests []string
+	csv    string
+	want   string
+	ok     bool
+}
+
+var cases = []TestCase{
+	{
+		desc:   "no guests, empty csv",
+		guests: []string{""},
+		csv:    "",
+		want:   "",
+		ok:     true,
+	}, {
+		desc:   "one guest, empty csv",
+		guests: []string{"Foo"},
+		csv:    "",
+		want:   "",
+		ok:     true,
+	}, {
+		desc:   "one guest in csv",
+		guests: []string{"Foo", "Bar"},
+		csv:    "foo",
+		want:   "foo",
+		ok:     true,
+	}, {
+		desc:   "all guests",
+		guests: []string{"Foo", "Bar"},
+		csv:    "bar,foo",
+		want:   "bar,foo",
+		ok:     true,
+	}, {
+		desc:   "one non-invited name",
+		guests: []string{"Foo", "Bar"},
+		csv:    "bar,foo,baz",
+		want:   "",
+		ok:     false,
+	}, {
+		desc:   "one guest and one non-invited name",
+		guests: []string{"Foo", "Bar"},
+		csv:    "bar,baz",
+		want:   "",
+		ok:     false,
+	}, {
+		desc:   "one duplicate guest",
+		guests: []string{"Foo", "Bar"},
+		csv:    "bar,foo,foo",
+		want:   "",
+		ok:     false,
+	},
+}
+
 func TestBouncerCheck(t *testing.T) {
-	type TestCase struct {
-		desc   string
-		guests []string
-		csv    string
-		want   string
-		ok     bool
-	}
-	cases := []TestCase{
-		{
-			desc:   "no guests, empty csv",
-			guests: []string{""},
-			csv:    "",
-			want:   "",
-			ok:     true,
-		}, {
-			desc:   "one guest, empty csv",
-			guests: []string{"Foo"},
-			csv:    "",
-			want:   "",
-			ok:     true,
-		}, {
-			desc:   "one guest in csv",
-			guests: []string{"Foo", "Bar"},
-			csv:    "foo",
-			want:   "foo",
-			ok:     true,
-		}, {
-			desc:   "all guests",
-			guests: []string{"Foo", "Bar"},
-			csv:    "bar,foo",
-			want:   "bar,foo",
-			ok:     true,
-		}, {
-			desc:   "one non-invited name",
-			guests: []string{"Foo", "Bar"},
-			csv:    "bar,foo,baz",
-			want:   "",
-			ok:     false,
-		}, {
-			desc:   "one guest and one non-invited name",
-			guests: []string{"Foo", "Bar"},
-			csv:    "bar,baz",
-			want:   "",
-			ok:     false,
-		}, {
-			desc:   "one duplicate guest",
-			guests: []string{"Foo", "Bar"},
-			csv:    "bar,foo,foo",
-			want:   "",
-			ok:     false,
-		},
-	}
 	for _, c := range cases {
 		f := func(t *testing.T) {
 			bouncer := party.NewBouncer(c.guests...)
@@ -69,5 +71,18 @@ func TestBouncerCheck(t *testing.T) {
 			}
 		}
 		t.Run(c.desc, f)
+	}
+}
+
+func BenchmarkBouncerCheck(b *testing.B) {
+	for _, c := range cases {
+		f := func(b *testing.B) {
+			b.ReportAllocs()
+			bouncer := party.NewBouncer(c.guests...)
+			for b.Loop() {
+				bouncer.Check(c.csv)
+			}
+		}
+		b.Run(c.desc, f)
 	}
 }

@@ -37,9 +37,8 @@ func (b Bouncer) Check(csv string) (string, bool) {
 	for _, name := range names {
 		var ok bool
 		for _, guest := range b.guests {
-			normalized := strings.ToLower(guest)
-			if name == normalized {
-				accepted = append(accepted, normalized)
+			if name == guest {
+				accepted = append(accepted, guest)
 				ok = true
 				break
 			}
